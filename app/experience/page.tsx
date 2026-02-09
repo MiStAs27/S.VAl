@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import Scene3D from '@/components/Scene3D'
-import FallingPetals from '@/components/FallingPetals'
-import MessageBoard from '@/components/MessageBoard'
+import Scene3D from '@/components/ParticleEffects'
+import FallingPetals from '@/components/FloatingControls'
+import MessageBoard from '@/components/StepMessages'
 
 export default function Experience() {
   const audioRef = useRef<HTMLAudioElement | null>(null)

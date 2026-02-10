@@ -16,7 +16,7 @@ export default function Experience() {
 
   return (
     <div className="relative min-h-screen bg-black overflow-x-hidden">
-      <audio ref={audioRef} src="/audio/cancion-romantica.mp3" loop />
+      <audio ref={audioRef} src="@/audio/confieso.mp3" loop />
       
       <FallingPetals show3DScene={false} onToggle3DScene={function (): void {
         throw new Error('Function not implemented.')

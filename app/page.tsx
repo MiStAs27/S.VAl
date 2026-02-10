@@ -11,6 +11,7 @@ import NavigationFooter from "@/components/NavigationFooter";
 import FallingPetals from "@/components/FallingPetals";
 import Scene3D from "@/components/Scene3D";
 import confetti from "canvas-confetti";
+import { useMediaQuery } from "react-responsive";
 
 export default function ValentinePage() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -19,6 +20,7 @@ export default function ValentinePage() {
   const [inputValue, setInputValue] = useState("");
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [show3DScene, setShow3DScene] = useState(false);
+  const isMobile = useMediaQuery({ maxWidth: 768 });
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   const steps = [
@@ -215,7 +217,7 @@ export default function ValentinePage() {
       />
 
       <footer className="mt-8 text-center text-gray-500 text-sm pb-4">
-        <p>Paso {currentStep + 1} de {steps.length} • Creado con todo mi ❤️ para ti</p>
+        <p>Paso {currentStep + 1} de {steps.length} • Creado por HM para ti</p>
       </footer>
     </main>
   );

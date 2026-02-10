@@ -18,7 +18,9 @@ export default function Experience() {
     <div className="relative min-h-screen bg-black overflow-x-hidden">
       <audio ref={audioRef} src="/audio/cancion-romantica.mp3" loop />
       
-      <FallingPetals />
+      <FallingPetals show3DScene={false} onToggle3DScene={function (): void {
+        throw new Error('Function not implemented.')
+      } } />
       
       <section className="h-screen w-full relative">
         <Scene3D />
@@ -28,7 +30,11 @@ export default function Experience() {
       </section>
 
       <section className="py-20 px-4">
-        <MessageBoard />
+        <MessageBoard texts={[]} currentTextIndex={0} onTextChange={function (index: number): void {
+          throw new Error('Function not implemented.')
+        } } onNext={function (): void {
+          throw new Error('Function not implemented.')
+        } } />
       </section>
     </div>
   )

@@ -2,7 +2,8 @@
 import { useEffect, useRef } from 'react'
 import Scene3D from '@/components/ParticleEffects'
 import FallingPetals from '@/components/FloatingControls'
-import MessageBoard from '@/components/StepMessages'
+import StepMessages from '@/components/StepMessages'
+import MessageBoard from '@/components/MessageBoar'
 
 export default function Experience() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -28,14 +29,15 @@ export default function Experience() {
           Desliza para leer ↓
         </div>
       </section>
-
-      <section className="py-20 px-4">
-        <MessageBoard texts={[]} currentTextIndex={0} onTextChange={function (index: number): void {
-          throw new Error('Function not implemented.')
-        } } onNext={function (): void {
-          throw new Error('Function not implemented.')
-        } } />
-      </section>
+      <StepMessages
+        texts={[
+          { title: "Bienvenido", content: "Este es un mensaje de prueba." }
+        ]}
+        currentTextIndex={0}
+        onTextChange={() => {}}
+        onNext={() => {}}
+      />
+      <MessageBoard/>
     </div>
   )
 }

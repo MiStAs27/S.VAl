@@ -194,8 +194,8 @@ export default function ValentinePage() {
               </h1>
               <p className="text-gray-400 mt-2">
                 {currentStep === 0 && "Algo especial"}
-                {currentStep === 1 && "..."}
-                {currentStep === 2 && "El momento decisivo..."}
+                {currentStep === 1 && "Sincero"}
+                {currentStep === 2 && "Miedo 🥶"}
               </p>
             </motion.div>
 
@@ -217,7 +217,7 @@ export default function ValentinePage() {
       />
 
       <footer className="mt-8 text-center text-gray-500 text-sm pb-4">
-        <p>Paso {currentStep + 1} de {steps.length} • Creado por HM para ti</p>
+        <p>Paso {currentStep + 1} de {steps.length} • Creado por HM para ade</p>
       </footer>
     </main>
   );

@@ -28,7 +28,7 @@ export default function StepIntro({ isUnlocked, onUnlock }: StepIntroProps) {
           Para ti Adelaida...
         </h2>
         <p className="text-base md:text-lg lg:text-xl text-gray-300 mb-6 md:mb-8 max-w-lg mx-auto px-2">
-          Guarde esto en mi corazón por un tiempo. ¿Me permites compartirlo contigo?
+          Guarde esto en mi por un tiempo. ¿Me permites compartirlo contigo?
         </p>
       </motion.div>
 

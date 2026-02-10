@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Adelaida's Surprise",
-  description: "Elaborado por HM para Adelaida con mucho cariño",
+  title: "Surprise Adelaida",
+  description: "Elaborado por HM para Adelaida",
 };
 
 export default function RootLayout({

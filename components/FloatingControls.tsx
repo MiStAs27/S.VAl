@@ -15,6 +15,8 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
   const [currentSongIndex, setCurrentSongIndex] = useState(0)
   const [songTitle, setSongTitle] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  const [autoPlayAttempted, setAutoPlayAttempted] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   
   // Rutas de audio - versión corregida para Vercel
@@ -30,29 +32,44 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
   useEffect(() => {
     const initializeAudio = async () => {
       try {
+        console.log("🎵 Inicializando reproductor de audio...")
+        
         // Crear nueva instancia de audio
         const audio = new Audio(songs[0].src)
-        audio.preload = "metadata"
+        audio.preload = "auto"
+        audio.volume = 0.5 // Volumen inicial al 50%
+        
+        // Configurar eventos de audio
+        audio.addEventListener('error', (e) => {
+          console.error(`❌ Error de audio:`, e)
+          console.error(`Src actual: ${audio.src}`)
+          
+          // Intentar con ruta absoluta como fallback
+          const absolutePath = `${window.location.origin}${songs[0].src.replace(process.env.NEXT_PUBLIC_BASE_PATH || '', '')}`
+          console.log(`🔄 Intentando con ruta absoluta: ${absolutePath}`)
+          audio.src = absolutePath
+        })
+        
+        audio.addEventListener('loadeddata', () => {
+          console.log(`✅ Audio cargado: ${songs[0].title}`)
+        })
+        
+        audio.addEventListener('canplaythrough', () => {
+          console.log(`✅ Audio listo para reproducir: ${songs[0].title}`)
+        })
+        
+        audioRef.current = audio
+        setSongTitle(songs[0].title)
         
         // Verificar que el archivo existe
         const response = await fetch(songs[0].src)
         if (!response.ok) {
           console.warn(`⚠️ No se pudo cargar inicialmente: ${songs[0].title} (${response.status})`)
-          console.warn(`Ruta intentada: ${songs[0].src}`)
           
-          // Intentar con ruta absoluta como fallback
+          // Intentar con ruta absoluta
           const absolutePath = `${window.location.origin}${songs[0].src.replace(process.env.NEXT_PUBLIC_BASE_PATH || '', '')}`
           audio.src = absolutePath
         }
-        
-        audioRef.current = audio
-        setSongTitle(songs[0].title)
-        
-        // Evento de error para depuración
-        audio.addEventListener('error', (e) => {
-          console.error(`❌ Error de audio:`, e)
-          console.error(`Src actual: ${audio.src}`)
-        })
         
       } catch (error) {
         console.error("Error inicializando audio:", error)
@@ -75,7 +92,63 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
           console.warn(`❌ Canción ${index + 1} (${song.title}): Error de red`)
         })
     })
+    
+    // Limpiar al desmontar
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+    }
   }, [])
+
+  // Intentar autoplay cuando la página se carga
+  useEffect(() => {
+    const attemptAutoPlay = async () => {
+      // Esperar un momento para que todo se cargue
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (audioRef.current && !autoPlayAttempted) {
+        try {
+          console.log("🎵 Intentando reproducción automática...")
+          
+          // Verificar si el audio está listo
+          if (audioRef.current.readyState < 2) {
+            await new Promise((resolve, reject) => {
+              audioRef.current?.addEventListener('canplaythrough', resolve, { once: true })
+              audioRef.current?.addEventListener('error', reject, { once: true })
+              setTimeout(() => reject(new Error("Timeout")), 3000)
+            })
+          }
+          
+          // Intentar reproducir
+          await audioRef.current.play()
+          console.log("✅ Reproducción automática exitosa")
+          setIsPlaying(true)
+          
+        } catch (error: any) {
+          console.log("⚠️ Autoplay bloqueado o fallido:", error.message)
+          
+          // Si es un error de política de autoplay, esperar interacción del usuario
+          if (error.name === "NotAllowedError") {
+            console.log("👆 El navegador requiere interacción del usuario")
+            
+            // Mostrar un mensaje sutil (opcional)
+            // Podemos mostrar un tooltip o indicador visual
+          }
+        } finally {
+          setAutoPlayAttempted(true)
+        }
+      }
+    }
+    
+    // Intentar autoplay después de que todo esté listo
+    const timer = setTimeout(() => {
+      attemptAutoPlay()
+    }, 1500)
+    
+    return () => clearTimeout(timer)
+  }, [autoPlayAttempted])
 
   // Configurar evento de fin de canción
   useEffect(() => {
@@ -102,6 +175,36 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
     }
   }, [currentSongIndex])
 
+  // Añadir event listeners para detectar interacción del usuario
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      if (!hasUserInteracted) {
+        console.log("👆 Usuario interactuó con la página")
+        setHasUserInteracted(true)
+        
+        // Si el autoplay falló anteriormente, intentar de nuevo
+        if (!isPlaying && audioRef.current && autoPlayAttempted) {
+          console.log("🔄 Reintentando reproducción después de interacción del usuario")
+          setTimeout(() => {
+            toggleMusic()
+          }, 300)
+        }
+      }
+    }
+    
+    // Eventos comunes de interacción
+    const events = ['click', 'touchstart', 'keydown', 'scroll']
+    events.forEach(event => {
+      window.addEventListener(event, handleUserInteraction, { once: true })
+    })
+    
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, handleUserInteraction)
+      })
+    }
+  }, [hasUserInteracted, isPlaying, autoPlayAttempted])
+
   const playNextSong = async () => {
     const nextIndex = (currentSongIndex + 1) % songs.length
     
@@ -124,6 +227,7 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
         // Crear nueva instancia de Audio con la siguiente canción
         const newAudio = new Audio(songs[nextIndex].src)
         newAudio.preload = "auto"
+        newAudio.volume = audioRef.current.volume // Mantener el mismo volumen
         
         // Configurar eventos de error
         newAudio.addEventListener('error', (e) => {
@@ -185,10 +289,6 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
         if (error.message.includes("404") || error.message.includes("no encontrado")) {
           errorMessage += `\n\n🔍 Verifica que el archivo exista en: public/audio/${songs[nextIndex].src.split('/').pop()}`
           errorMessage += `\n📁 Ruta intentada: ${songs[nextIndex].src}`
-          
-          // Sugerencia para probar ruta manualmente
-          const testPath = `${window.location.origin}/audio/${songs[nextIndex].src.split('/').pop()}`
-          errorMessage += `\n\n💡 Prueba acceder manualmente a: ${testPath}`
         } else if (error.message.includes("Timeout")) {
           errorMessage += "\n⏰ El archivo tardó demasiado en cargarse."
         }
@@ -202,6 +302,11 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
   }
 
   const toggleMusic = async () => {
+    // Marcar que el usuario ha interactuado
+    if (!hasUserInteracted) {
+      setHasUserInteracted(true)
+    }
+    
     if (!audioRef.current) {
       // Intentar crear audio con diferentes estrategias si falla
       const audioPaths = [
@@ -214,6 +319,7 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
         try {
           const testAudio = new Audio(path)
           testAudio.preload = "auto"
+          testAudio.volume = 0.5
           
           // Verificar rápidamente si el archivo existe
           const response = await fetch(path)
@@ -281,6 +387,11 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
   }
 
   const skipToNext = async () => {
+    // Marcar que el usuario ha interactuado
+    if (!hasUserInteracted) {
+      setHasUserInteracted(true)
+    }
+    
     if (isLoading) return
     
     await playNextSong()
@@ -298,7 +409,17 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
     }
   }
 
+  // Control de volumen (opcional)
+  const adjustVolume = (level: number) => {
+    if (audioRef.current) {
+      audioRef.current.volume = level
+    }
+  }
+
   const getMusicButtonTitle = () => {
+    if (!hasUserInteracted && !isPlaying) {
+      return "🎵 La música comenzará automáticamente... (da clic si no inicia)"
+    }
     if (isLoading) return 'Cargando...'
     if (!isPlaying) return `Reproducir: ${songTitle} (${currentSongIndex + 1}/${songs.length}) • Bucle activo`
     return `Reproduciendo: ${songTitle} (${currentSongIndex + 1}/${songs.length}) • Bucle activo`
@@ -306,6 +427,18 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
 
   return (
     <div className={`fixed ${isMobile ? 'bottom-4 right-4' : 'bottom-6 right-6'} flex gap-2 md:gap-3 z-20`}>
+      {/* Indicador de autoplay (solo visible al inicio) */}
+      {!hasUserInteracted && !isPlaying && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className="absolute -top-12 right-0 bg-black/80 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap"
+        >
+          🎵 La música comenzará en breve...
+        </motion.div>
+      )}
+      
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={onToggle3DScene}
@@ -329,7 +462,9 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
               ? 'bg-gray-600/30 border-gray-500/50 text-gray-400'
               : isPlaying 
                 ? 'bg-green-600/30 border-green-500/50 text-green-400'
-                : 'bg-white/10 border-pink-400/30'
+                : hasUserInteracted 
+                  ? 'bg-white/10 border-pink-400/30'
+                  : 'bg-blue-600/30 border-blue-500/50 text-blue-400 animate-pulse'
           }`}
           title={getMusicButtonTitle()}
         >
@@ -338,20 +473,35 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
           ) : isPlaying ? (
             <Pause size={isMobile ? 18 : 22} />
           ) : (
-            <Music size={isMobile ? 18 : 22} />
+            <div className="relative">
+              <Music size={isMobile ? 18 : 22} />
+              {!hasUserInteracted && (
+                <motion.span 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full"
+                />
+              )}
+            </div>
           )}
           
           {!isMobile && (
             <span className={`absolute -top-8 px-2 py-1 rounded whitespace-nowrap text-xs ${
               isLoading
                 ? 'bg-gray-900/90 text-gray-200'
-                : 'bg-black/80 text-white'
+                : isPlaying
+                  ? 'bg-black/80 text-white'
+                  : !hasUserInteracted
+                    ? 'bg-blue-900/90 text-blue-200'
+                    : 'bg-black/80 text-white'
             }`}>
-              {isLoading 
-                ? '⏳ Cargando...' 
-                : isPlaying 
-                  ? `▶️ ${songTitle} (${currentSongIndex + 1}/${songs.length})`
-                  : `⏸️ ${songTitle} (${currentSongIndex + 1}/${songs.length})`}
+              {!hasUserInteracted && !isPlaying 
+                ? '🎵 Iniciando...' 
+                : isLoading 
+                  ? '⏳ Cargando...' 
+                  : isPlaying 
+                    ? `▶️ ${songTitle} (${currentSongIndex + 1}/${songs.length})`
+                    : `⏸️ ${songTitle} (${currentSongIndex + 1}/${songs.length})`}
             </span>
           )}
         </motion.button>

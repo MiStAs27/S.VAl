@@ -21,11 +21,12 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
   
   // Rutas de audio - versión corregida para Vercel
   const songs = [
-    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/bajo-el-agua.mp3`, title: "Bajo el Agua" },
+    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/bemaste2.mp3`, title: "Bemaste" },
     { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/confieso.mp3`, title: "Confieso" },
-    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/bemaste.mp3`, title: "Bemaste" },
-    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/its-you.mp3`, title: "It's You" },
-    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/me_enamore.mp3`, title: "Me Enamoré" },
+    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/bajo-el-agua2.mp3`, title: "Bajo el Agua" },
+    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/Te-Quiero-Aqu-Ya2.mp3`, title: "Te Quiero Aquí Ya" },
+    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/me_enamore2.mp3`, title: "Me Enamoré" },
+    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/Cafune2.mp3`, title: "Cafune" },
   ]
   
   // Inicializar audio y verificar archivos

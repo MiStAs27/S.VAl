@@ -12,6 +12,10 @@ import FallingPetals from "@/components/FallingPetals";
 import Scene3D from "@/components/Scene3D";
 import confetti from "canvas-confetti";
 import { useMediaQuery } from "react-responsive";
+import emailjs from "@emailjs/browser";
+
+// Inicializar EmailJS con tu Public Key
+emailjs.init("A-yUd9zz05mXPAw1b");
 
 export default function ValentinePage() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -32,7 +36,7 @@ export default function ValentinePage() {
   const texts = [
     {
       title: "Para Ti",
-      content: "Te agradesco por cada sonrisa, cada abrazo, cada momento compartido. Tú me diste lo que muchos buscan toda su vida."
+      content: "Te agradezco por cada sonrisa, cada abrazo, cada momento compartido. Tú me diste lo que muchos buscan toda su vida."
     },
     {
       title: "Sonrisa",
@@ -84,19 +88,34 @@ export default function ValentinePage() {
     }, 500);
   };
 
-  const addMessage = (e: React.FormEvent) => {
+  const addMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim()) {
-      setMessages([...messages, inputValue]);
-      setInputValue("");
-      
-      confetti({
-        particleCount: 30,
-        spread: 40,
-        origin: { y: 0.8 },
-        colors: ["#ff69b4"],
-      });
+    if (!inputValue.trim()) return;
+
+    // 1. Guardar mensaje en el estado local (se muestra en la lista)
+    const newMessage = inputValue;
+    setMessages([...messages, newMessage]);
+    setInputValue("");
+
+    // 2. Enviar por EmailJS (te llega a tu correo)
+    try {
+      await emailjs.send(
+        'service_j3hnhp9',      // Service ID
+        'template_laomrq4',     // Template ID
+        { message: newMessage } // Variables
+      );
+      console.log('✅ Mensaje enviado por correo');
+    } catch (error) {
+      console.error('❌ Error al enviar correo:', error);
     }
+
+    // 3. Confeti
+    confetti({
+      particleCount: 30,
+      spread: 40,
+      origin: { y: 0.8 },
+      colors: ["#ff69b4"],
+    });
   };
 
   const nextStep = () => {

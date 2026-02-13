@@ -27,14 +27,51 @@ export default function StepQuestion({
   const isMobile = useMediaQuery({ maxWidth: 768 })
 
   const handleCelebrate = () => {
-    setIsCelebrating(true)
+  setIsCelebrating(true);
+  
+  // Oleada principal de pétalos
+  confetti({
+    particleCount: isMobile ? 200 : 400,
+    spread: 180,
+    origin: { y: 0.6, x: 0.5 },
+    colors: ['#ffb7c5', '#ff9eb5', '#ff7a9e', '#ff4d6d', '#e63946'],
+    shapes: ['circle'],
+    scalar: 1.2,
+    drift: 0.5,
+    gravity: 0.7,
+    ticks: 300,
+  });
+
+  // Pétalos desde la izquierda y derecha (más íntimo)
+  setTimeout(() => {
     confetti({
-      particleCount: isMobile ? 150 : 300,
-      spread: 160,
-      origin: { y: 0.5 }
-    })
-    setTimeout(() => setIsCelebrating(false), 1000)
-  }
+      particleCount: isMobile ? 80 : 150,
+      angle: 60,
+      spread: 100,
+      origin: { x: 0, y: 0.6 },
+      colors: ['#ffb7c5', '#ff9eb5', '#ff7a9e', '#ff4d6d'],
+      shapes: ['circle'],
+      scalar: 1,
+      drift: 0.8,
+      gravity: 0.6,
+      ticks: 250,
+    });
+    confetti({
+      particleCount: isMobile ? 80 : 150,
+      angle: 120,
+      spread: 100,
+      origin: { x: 1, y: 0.6 },
+      colors: ['#ffb7c5', '#ff9eb5', '#ff7a9e', '#ff4d6d'],
+      shapes: ['circle'],
+      scalar: 1,
+      drift: -0.8,
+      gravity: 0.6,
+      ticks: 250,
+    });
+  }, 150);
+
+  setTimeout(() => setIsCelebrating(false), 1000);
+};
 
   return (
     <motion.div
@@ -91,7 +128,7 @@ export default function StepQuestion({
           animate={{ opacity: 1, scale: 1 }}
           className="mt-6 md:mt-8 p-5 md:p-6 lg:p-8 bg-gradient-to-r from-green-900/30 to-emerald-900/30 rounded-2xl md:rounded-3xl border border-emerald-500/50 shadow-xl shadow-emerald-900/20"
         >
-          <div className="text-4xl md:text-5xl mb-3 md:mb-4">🎉💖✨</div>
+          <div className="text-4xl md:text-5xl mb-3 md:mb-4">🌹💖✨</div>
           <h4 className="text-xl md:text-2xl text-emerald-300 font-bold mb-3 md:mb-4">
             ¡Sabia que dirias que Si!
             jajajaja
@@ -109,7 +146,7 @@ export default function StepQuestion({
               disabled={isCelebrating}
               className="px-5 py-2 md:px-6 md:py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-full hover:from-yellow-500 hover:to-orange-500 transition-all disabled:opacity-50 text-sm md:text-base w-full md:w-auto min-h-[44px]"
             >
-              {isCelebrating ? '¡Celebrando!' : '¡Celebremos con más confeti! 🎊'}
+              {isCelebrating ? '¡Rosas!' : '¡Más Rosas! 🌹'}
             </button>
           </motion.div>
         </motion.div>

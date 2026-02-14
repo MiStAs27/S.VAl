@@ -27,6 +27,7 @@ export default function FloatingControls({ show3DScene, onToggle3DScene }: Float
     { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/Te-Quiero-Aqu-Ya2.mp3`, title: "Te Quiero Aquí Ya" },
     { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/me_enamore2.mp3`, title: "Me Enamoré" },
     { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/Cafune2.mp3`, title: "Cafune" },
+    { src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/audio/02-14.mp4`, title: "Soltar" },
   ]
   
   // Inicializar audio y verificar archivos
